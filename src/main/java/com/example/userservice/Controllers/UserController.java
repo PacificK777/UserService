@@ -1,12 +1,16 @@
 package com.example.userservice.Controllers;
 
 import com.example.userservice.DTOs.*;
+import com.example.userservice.Exceptions.InvalidPasswordException;
+import com.example.userservice.Exceptions.UserNotFoundException;
+import com.example.userservice.Models.Token;
 import com.example.userservice.Models.User;
 import com.example.userservice.Services.UserService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.view.RedirectView;
 
 @RestController
 @RequestMapping("/user")
@@ -16,9 +20,34 @@ public class UserController {
     public UserController(UserService userService){
         this.userService = userService;
     }
-    public LoginResponseDTO login(LoginRequestDTO requestDTO){
-        return null;
+
+
+
+    @PostMapping("/login")
+    public LoginResponseDTO login(@RequestBody LoginRequestDTO requestDTO) throws UserNotFoundException, InvalidPasswordException {
+        LoginResponseDTO responseDTO = new LoginResponseDTO();
+        try {
+            Token token = userService.login(
+                    requestDTO.getEmail(),
+                    requestDTO.getPassword()
+            );
+            responseDTO.setToken(token);
+            responseDTO.setResponseStatus(ResponseStatus.SUCCESS);
+            responseDTO.setMessage("Login Successful");
+        }
+        catch(UserNotFoundException e){
+            responseDTO.setResponseStatus(ResponseStatus.FAILURE);
+            responseDTO.setMessage("User not found. Redirecting to singup.");
+            responseDTO.setRedirectURL("/signup");
+        } catch (InvalidPasswordException e){
+            responseDTO.setResponseStatus(ResponseStatus.FAILURE);
+            responseDTO.setMessage("Invalid password");
+        }
+        return responseDTO;
     }
+
+
+
     @PostMapping("/signup")
     public SignUpResponseDTO signUp(@RequestBody SignUpRequestDTO requestDTO){
         User user = userService.signUp(
