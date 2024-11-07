@@ -25,4 +25,6 @@ public class BaseModel {
     @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     private Date modifiedAt;
+
+    private Boolean isDeleted;
 }

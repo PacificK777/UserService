@@ -44,6 +44,7 @@ public class UserServiceImpl implements UserService{
             user.setName(name);
             user.setEmail(email);
             user.setHashedPassword(bCryptPasswordEncoder.encode(password));
+            user.setIsDeleted(false);
 
             user = userRepository.save(user);
         }
@@ -74,6 +75,7 @@ public class UserServiceImpl implements UserService{
     private Token createToken(User user){
         Token token = new Token();
         token.setUser(user);
+        token.setIsDeleted(false);
         //create random string of specific number of characters using library apache lang 3 commons
         token.setValue(RandomStringUtils.randomAlphabetic(50));
         LocalDate today = LocalDate.now();
@@ -90,8 +92,17 @@ public class UserServiceImpl implements UserService{
         return null;
     }
 
+
+
     @Override
     public void logout(String token) {
+    Optional<Token> optionalToken = tokenRepository.findByValueAndIsDeleted(token, false);
 
+    if(optionalToken.isEmpty()){
+    //through some exception
+    }
+    Token token1 = optionalToken.get();
+    token1.setIsDeleted(true);
+    tokenRepository.save(token1);
     }
 }

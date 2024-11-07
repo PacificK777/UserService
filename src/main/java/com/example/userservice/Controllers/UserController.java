@@ -6,25 +6,25 @@ import com.example.userservice.Exceptions.UserNotFoundException;
 import com.example.userservice.Models.Token;
 import com.example.userservice.Models.User;
 import com.example.userservice.Services.UserService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.view.RedirectView;
 
 @RestController
 @RequestMapping("/user")
 public class UserController {
     private UserService userService;
 
-    public UserController(UserService userService){
+    public UserController(UserService userService) {
         this.userService = userService;
     }
 
 
-
     @PostMapping("/login")
-    public LoginResponseDTO login(@RequestBody LoginRequestDTO requestDTO) throws UserNotFoundException, InvalidPasswordException {
+    public LoginResponseDTO login(@RequestBody LoginRequestDTO requestDTO) {
         LoginResponseDTO responseDTO = new LoginResponseDTO();
         try {
             Token token = userService.login(
@@ -34,12 +34,12 @@ public class UserController {
             responseDTO.setToken(token);
             responseDTO.setResponseStatus(ResponseStatus.SUCCESS);
             responseDTO.setMessage("Login Successful");
-        }
-        catch(UserNotFoundException e){
+        } catch (UserNotFoundException e) {
             responseDTO.setResponseStatus(ResponseStatus.FAILURE);
             responseDTO.setMessage("User not found. Redirecting to singup.");
             responseDTO.setRedirectURL("/signup");
-        } catch (InvalidPasswordException e){
+
+        } catch (InvalidPasswordException e) {
             responseDTO.setResponseStatus(ResponseStatus.FAILURE);
             responseDTO.setMessage("Invalid password");
         }
@@ -47,30 +47,43 @@ public class UserController {
     }
 
 
-
     @PostMapping("/signup")
-    public SignUpResponseDTO signUp(@RequestBody SignUpRequestDTO requestDTO){
+    public SignUpResponseDTO signUp(@RequestBody SignUpRequestDTO requestDTO) {
         User user = userService.signUp(
                 requestDTO.getName(),
                 requestDTO.getEmail(),
                 requestDTO.getPassword()
         );
         SignUpResponseDTO responseDTO = new SignUpResponseDTO();
-        if(user != null) {
+        if (user != null) {
             responseDTO.setUser(user);
             responseDTO.setResponseStatus(ResponseStatus.SUCCESS);
             responseDTO.setMessage("User created successfully");
-        } else{
+        } else {
             responseDTO.setResponseStatus(ResponseStatus.FAILURE);
             responseDTO.setMessage("Email id might already be present");
         }
         return responseDTO;
     }
-    public UserDTO validateToken(ValidateTokenRequestDTO requestDTO){
-        return null;
-    }
-    public LoginResponseDTO logout(LoginRequestDTO requestDTO){
+
+
+    public UserDTO validateToken(ValidateTokenRequestDTO requestDTO) {
         return null;
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<LogoutResponseDTO> logout(@RequestBody LogoutRequestDTO requestDTO) {
+        LogoutResponseDTO responseDTO = new LogoutResponseDTO();
+        try {
+            userService.logout(requestDTO.getToken());
+            responseDTO.setResponseStatus(ResponseStatus.SUCCESS);
+            responseDTO.setMessage("Logout successful");
+            return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+        }
+        catch (Exception e) {
+            responseDTO.setResponseStatus(ResponseStatus.FAILURE);
+            responseDTO.setMessage("Logout failed");
+            return new ResponseEntity<>(responseDTO, HttpStatus.UNAUTHORIZED);
+        }
+    }
 }
