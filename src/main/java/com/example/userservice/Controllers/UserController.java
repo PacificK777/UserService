@@ -1,6 +1,7 @@
 package com.example.userservice.Controllers;
 
 import com.example.userservice.DTOs.*;
+import com.example.userservice.DTOs.ResponseStatus;
 import com.example.userservice.Exceptions.InvalidPasswordException;
 import com.example.userservice.Exceptions.UserNotFoundException;
 import com.example.userservice.Models.Token;
@@ -8,10 +9,7 @@ import com.example.userservice.Models.User;
 import com.example.userservice.Services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/user")
@@ -67,9 +65,14 @@ public class UserController {
     }
 
 
-    public UserDTO validateToken(ValidateTokenRequestDTO requestDTO) {
-        return null;
+    @GetMapping("/validate/{token}")
+    public UserDTO validateToken(@PathVariable("token") String token) {
+        User user = userService.validateToken(token);
+
+        return UserDTO.fromUser(user);
     }
+
+
 
     @PostMapping("/logout")
     public ResponseEntity<LogoutResponseDTO> logout(@RequestBody LogoutRequestDTO requestDTO) {
