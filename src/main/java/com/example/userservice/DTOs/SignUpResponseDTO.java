@@ -9,4 +9,5 @@ import lombok.Setter;
 public class SignUpResponseDTO {
     private User user;
     private ResponseStatus responseStatus;
+    private String message;
 }

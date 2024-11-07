@@ -30,8 +30,10 @@ public class UserController {
         if(user != null) {
             responseDTO.setUser(user);
             responseDTO.setResponseStatus(ResponseStatus.SUCCESS);
+            responseDTO.setMessage("User created successfully");
         } else{
             responseDTO.setResponseStatus(ResponseStatus.FAILURE);
+            responseDTO.setMessage("Email id might already be present");
         }
         return responseDTO;
     }
